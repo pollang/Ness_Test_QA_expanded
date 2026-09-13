@@ -49,9 +49,6 @@ class ResultManager:
                 results.append(result)
         return results
 
-    def compare_results(self, run_ids: List[str]) -> Dict[str, Dict]:
-        return {run_id: self.load_result(run_id).get("statistics", {}) for run_id in run_ids}
-
     def save_comparison(self, comparison: Dict) -> str:
         """Saves a cross-ammeter comparison (see StatisticsAnalyzer.compare) under
         results/comparisons/, separate from per-run files so it's never picked up

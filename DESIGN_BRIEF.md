@@ -69,7 +69,7 @@ Different from Accuracy Assessment above — this one is about *one* ammeter's o
 
 ## Retrieving and comparing historical results (`--history`)
 
-`ResultManager.list_results()`/`compare_results()` already read archived results off disk, but were never wired into anything runnable — dead code, same issue as `confidence_interval()` before it got wired up. Added `run_test_suite.py --history`: `--history --ammeter <type>` lists every past run for that ammeter (with mean/median/stdev/CV per run); `--history --ammeter all --compare` takes the latest archived run per ammeter and runs them through the same `StatisticsAnalyzer.compare()` used for live results, so historical and live comparisons look identical and both get saved under `results/comparisons/`.
+`ResultManager.list_results()` already read archived results off disk, but was never wired into anything runnable. Added `run_test_suite.py --history`: `--history --ammeter <type>` lists every past run for that ammeter (with mean/median/stdev/CV per run); `--history --ammeter all --compare` takes the latest archived run per ammeter and runs them through the same `StatisticsAnalyzer.compare()` used for live results, so historical and live comparisons look identical and both get saved under `results/comparisons/`.
 
 ## Cross-platform notes
 
