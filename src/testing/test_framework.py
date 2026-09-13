@@ -2,12 +2,19 @@ import random
 import socket
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, NamedTuple, Optional
 
 from src.testing.result_manager import ResultManager
 from src.testing.statistics_analyzer import StatisticsAnalyzer
 from src.utils.logger import TestLogger
 from src.utils.config import load_config
+
+
+class SamplingOutcome(NamedTuple):
+    readings: List[float]
+    sample_timestamps: List[float]
+    errors: int
+    max_jitter_seconds: float
 
 
 class AmmeterTestFramework:
@@ -79,10 +86,11 @@ class AmmeterTestFramework:
                           f"{errors} errors, run_id={run_id}")
         return result
 
-    def _collect_samples(self, ammeter_type: str, ammeter_cfg: Dict, sampling_cfg: Dict, drop_probability: float):
+    def _collect_samples(
+        self, ammeter_type: str, ammeter_cfg: Dict, sampling_cfg: Dict, drop_probability: float
+    ) -> SamplingOutcome:
         """Runs the timed sampling loop against one ammeter.
-        Returns (readings, sample_timestamps, errors, max_jitter_seconds) -
-        see run_test()'s "timing" docs for what jitter means."""
+        See run_test()'s "timing" docs for what jitter means."""
         measurements_count = sampling_cfg["measurements_count"]
         total_duration = sampling_cfg["total_duration_seconds"]
         frequency = sampling_cfg["sampling_frequency_hz"]
@@ -117,7 +125,7 @@ class AmmeterTestFramework:
                 errors += 1
                 self.logger.error(f"{ammeter_type}: sample {i} failed: {exc}")
 
-        return readings, sample_timestamps, errors, max_jitter_seconds
+        return SamplingOutcome(readings, sample_timestamps, errors, max_jitter_seconds)
 
     @staticmethod
     def _sample_once(port: int, command: str, drop_probability: float = 0.0, timeout: float = 2.0) -> float:

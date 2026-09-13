@@ -5,6 +5,17 @@ import pandas as pd
 from scipy import stats as scipy_stats
 
 
+def _coefficient_of_variation(readings: List[float]) -> float:
+    """Performance consistency evaluation (spec section 3 bonus): how tightly this
+    single run's own readings cluster around their own mean - a per-run metric,
+    independent of comparing against other ammeters (that's compare(), below)."""
+    mean = float(np.mean(readings))
+    if mean == 0:
+        return float("inf")
+    stdev = float(np.std(readings, ddof=1)) if len(readings) > 1 else 0.0
+    return stdev / mean
+
+
 class StatisticsAnalyzer:
     """Computes statistical metrics on ammeter current readings and compares ammeters."""
 
@@ -14,12 +25,7 @@ class StatisticsAnalyzer:
         "stdev": lambda d: float(np.std(d, ddof=1)) if len(d) > 1 else 0.0,
         "min": lambda d: float(np.min(d)),
         "max": lambda d: float(np.max(d)),
-        # Performance consistency evaluation (spec section 3 bonus): how tightly this
-        # single run's own readings cluster around their own mean - a per-run metric,
-        # independent of comparing against other ammeters (that's compare(), below).
-        "coefficient_of_variation": lambda d: (
-            (float(np.std(d, ddof=1)) if len(d) > 1 else 0.0) / float(np.mean(d))
-        ) if float(np.mean(d)) != 0 else float("inf"),
+        "coefficient_of_variation": _coefficient_of_variation,
     }
 
     @classmethod

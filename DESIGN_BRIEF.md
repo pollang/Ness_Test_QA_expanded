@@ -83,6 +83,10 @@ Different from Accuracy Assessment above — this one is about *one* ammeter's o
 - Log file writing is pinned to UTF-8 explicitly, to avoid the same class of encoding issue.
 - `pathlib.Path` used for all result/plot file paths instead of hand-built strings.
 
+## Code quality cleanup
+
+Cleaned up during a code-quality pass: the CV metric's dense one-line lambda became a small named function; `_collect_samples()`'s bare 4-tuple return became a `NamedTuple` (self-documenting, same unpacking still works); Hebrew comments in `logger.py`/`config.py` translated to English; an unused `import datetime` removed from `base_ammeter.py`.
+
 ## Environment
 
 Python 3.12.5, project-local `.venv` — matches the original project's own PyCharm config (`.idea/misc.xml` pins Python 3.12).

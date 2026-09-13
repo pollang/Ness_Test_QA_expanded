@@ -120,6 +120,13 @@ The spec asks for a "unified testing interface" — callable the same way regard
 - **Checked, not an issue**: `Greenlee_Ammeter.py`'s Ω also appears in a `#` comment (not executed) and `logger.py`/`config.py` have Hebrew text in docstrings (never printed or logged) — Python parses `.py` source files as UTF-8 regardless of console codepage (PEP 3120), so neither is a runtime risk; the only *executed* non-ASCII character in the codebase was the one that got fixed.
 - **README's venv-activation instructions** originally showed only the Windows command; added the macOS/Linux equivalent (`source .venv/bin/activate`) alongside it.
 
+## Code quality cleanup (from a "check the code for code quality" pass)
+
+- **`StatisticsAnalyzer`'s `coefficient_of_variation`** was a dense one-line lambda that called `np.mean(d)` three times. Pulled out into a small named function, `_coefficient_of_variation()`, that computes the mean once and reads clearly.
+- **`_collect_samples()`** returned a bare 4-tuple `(readings, sample_timestamps, errors, max_jitter_seconds)`, unpacked positionally at the call site — fragile if the fields were ever reordered or extended. Replaced with a `SamplingOutcome(NamedTuple)`; the call site's positional unpacking still works unchanged (NamedTuples support both), but the return type is now self-documenting.
+- **Hebrew docstrings/comments** in `logger.py` and `config.py` (present in the original given code) were translated to English for consistency with the rest of the codebase.
+- **Unused `import datetime`** in `base_ammeter.py` removed (never referenced in the file).
+
 ## Interpreter / environment
 
 Developed and verified against **Python 3.12.5** in a project-local virtual environment (`.venv`). This matches the original project's own configuration: `.idea/misc.xml` (PyCharm project settings, present before this work started) pins `project-jdk-name="Python 3.12"`.
