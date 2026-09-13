@@ -87,6 +87,10 @@ Different from Accuracy Assessment above — this one is about *one* ammeter's o
 
 Cleaned up during a code-quality pass: the CV metric's dense one-line lambda became a small named function; `_collect_samples()`'s bare 4-tuple return became a `NamedTuple` (self-documenting, same unpacking still works); Hebrew comments in `logger.py`/`config.py` translated to English; an unused `import datetime` removed from `base_ammeter.py`.
 
+## Error handling: plotting can't lose archived data anymore
+
+`run_test()` used to plot before saving, with no error handling - a plotting failure meant the whole run's data was never archived. Reordering alone doesn't fix it cleanly (the saved JSON would miss `plot_path`, and saving twice trips the run_id overwrite guard). Fixed with a `try/except` around just the plotting call: it still runs before the single save, but a failure there is logged and the result is saved anyway, just without `plot_path`.
+
 ## Environment
 
 Python 3.12.5, project-local `.venv` — matches the original project's own PyCharm config (`.idea/misc.xml` pins Python 3.12).

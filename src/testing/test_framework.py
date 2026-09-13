@@ -52,11 +52,8 @@ class AmmeterTestFramework:
         metrics = analysis_cfg.get("statistical_metrics") or ["mean", "median", "stdev", "min", "max"]
         statistics = StatisticsAnalyzer.compute(readings, metrics)
 
-        # Human-readable, sortable id: <ammeter_type>_<YYYYMMDD>_<HHMMSS>_<milliseconds>
-        # e.g. "greenlee_20260913_200306_123" - lexicographic sort groups by ammeter
-        # and then puts the latest run last, which a random UUID couldn't do. Unlike a
-        # UUID this isn't inherently collision-proof, so ensure_unique_run_id() checks
-        # for (and resolves) a same-millisecond collision before it's ever used.
+        # <ammeter_type>_<YYYYMMDD>_<HHMMSS>_<milliseconds>, e.g. "greenlee_20260913_200306_123" -
+        # sortable by ammeter then time, but not collision-proof like a UUID.
         run_id = self.result_manager.ensure_unique_run_id(
             f"{ammeter_type}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]}"
         )
@@ -79,7 +76,10 @@ class AmmeterTestFramework:
         visualization_cfg = analysis_cfg.get("visualization", {}) or {}
         if visualization_cfg.get("enabled") and readings:
             from src.testing.visualization import plot_measurement_run
-            result["plot_path"] = plot_measurement_run(readings, ammeter_type, run_id, sample_timestamps)
+            try:
+                result["plot_path"] = plot_measurement_run(readings, ammeter_type, run_id, sample_timestamps)
+            except Exception as exc:
+                self.logger.error(f"{ammeter_type}: plotting failed, continuing without a plot: {exc}")
 
         self.result_manager.save_result(result)
         self.logger.info(f"{ammeter_type}: collected {len(readings)}/{sampling_cfg['measurements_count']} samples, "
@@ -116,10 +116,7 @@ class AmmeterTestFramework:
                 readings.append(reading)
                 actual_offset = time.monotonic() - start_time
                 sample_timestamps.append(actual_offset)
-                # Jitter = how far this sample landed from its scheduled target_time - what
-                # makes "precise timing" a checkable claim instead of an assumption, since the
-                # scheduling loop only controls when a sample is *attempted*, not how long the
-                # TCP connect/send/recv to the emulator actually takes.
+                # jitter = gap between the scheduled and actual sample time
                 max_jitter_seconds = max(max_jitter_seconds, abs(actual_offset - (target_time - start_time)))
             except (ConnectionRefusedError, ConnectionError, socket.timeout, ValueError) as exc:
                 errors += 1

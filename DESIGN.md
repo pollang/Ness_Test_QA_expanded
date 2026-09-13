@@ -127,6 +127,14 @@ The spec asks for a "unified testing interface" — callable the same way regard
 - **Hebrew docstrings/comments** in `logger.py` and `config.py` (present in the original given code) were translated to English for consistency with the rest of the codebase.
 - **Unused `import datetime`** in `base_ammeter.py` removed (never referenced in the file).
 
+## Error handling: a plotting failure must not lose archived data
+
+Found during a "comprehensive error handling" review: `run_test()` used to call `plot_measurement_run()` (an optional bonus feature) *before* `result_manager.save_result()`, with no error handling around it. Any plotting failure (disk full, a matplotlib/backend issue) would propagate out of `run_test()` and prevent the already-collected samples and statistics from ever being archived — a "nice to have" feature failing was able to take down the "must have" data.
+
+Considered simply reordering `save_result()` before plotting, but that creates two new problems: the archived JSON would never record `plot_path` (it's saved before the dict is updated with it), and calling `save_result()` a second time afterward to add it would trip the run_id overwrite guard (`FileExistsError`) added earlier for a different reason - working around that would need a second "update" method just for this one case.
+
+Fixed instead by wrapping the plotting call itself in a `try/except`, logging the failure and continuing: plotting still happens before the single `save_result()` call, but an exception there can no longer escape. `plot_path` ends up correctly present when plotting succeeds and simply absent when it fails, with one write, no special-cased overwrite path. Verified by mocking `plot_measurement_run` to raise and confirming the result still lands on disk with all samples intact.
+
 ## Interpreter / environment
 
 Developed and verified against **Python 3.12.5** in a project-local virtual environment (`.venv`). This matches the original project's own configuration: `.idea/misc.xml` (PyCharm project settings, present before this work started) pins `project-jdk-name="Python 3.12"`.

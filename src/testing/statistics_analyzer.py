@@ -6,9 +6,7 @@ from scipy import stats as scipy_stats
 
 
 def _coefficient_of_variation(readings: List[float]) -> float:
-    """Performance consistency evaluation (spec section 3 bonus): how tightly this
-    single run's own readings cluster around their own mean - a per-run metric,
-    independent of comparing against other ammeters (that's compare(), below)."""
+    """How tightly a single run's readings cluster around their own mean."""
     mean = float(np.mean(readings))
     if mean == 0:
         return float("inf")

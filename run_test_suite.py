@@ -63,10 +63,6 @@ def print_and_save_comparison(framework: AmmeterTestFramework, results_by_ammete
     comparison = StatisticsAnalyzer.compare(results_by_ammeter)
     print(comparison.to_string())
 
-    # comparison is already sorted by coefficient_of_variation ascending, so the
-    # first row is the answer to the spec's "identify most reliable measurement
-    # method" - stated explicitly here rather than leaving it for the reader to
-    # infer from the table.
     most_precise = comparison.index[0]
     most_precise_cv = comparison.loc[most_precise, "coefficient_of_variation"]
     conclusion = (f"Most precise/consistent measurement method: '{most_precise}' "

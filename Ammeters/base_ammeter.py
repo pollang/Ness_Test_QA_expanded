@@ -30,9 +30,8 @@ class AmmeterEmulatorBase(ABC):
                             current = self.measure_current()
                             conn.sendall(str(current).encode('utf-8'))
                     except Exception as exc:
-                        # A single bad request/measurement must not take down the whole
-                        # emulator - without this, one failure here would silently kill
-                        # this thread and refuse every future connection on this port.
+                        # without this, one failure here would silently kill this
+                        # thread and refuse every future connection on this port
                         print(f"{self.__class__.__name__} error handling request from {addr}: {exc}")
 
     @property

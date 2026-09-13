@@ -16,10 +16,7 @@ class ResultManager:
         run_id = result["run_id"]
         path = self.results_dir / f"{run_id}.json"
         if path.exists():
-            # run_id is timestamp-based (see AmmeterTestFramework.run_test), not a UUID,
-            # so it isn't collision-proof - refuse to silently overwrite an existing
-            # result rather than losing it. ensure_unique_run_id() is meant to prevent
-            # this from ever actually happening in normal use.
+            # run_id is timestamp-based, not a UUID, so it isn't collision-proof
             raise FileExistsError(f"A result already exists at {path} - refusing to overwrite it (run_id collision)")
         with open(path, "w", encoding="utf-8") as f:
             json.dump(result, f, indent=2)
