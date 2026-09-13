@@ -41,7 +41,13 @@ python main.py
 ```sh
 python run_test_suite.py --ammeter all --compare
 ```
-Options: `--ammeter {greenlee,entes,circutor,all}`, `--config <path>` (defaults to `config/config.yaml`), `--no-plot`, `--compare`.
+Options: `--ammeter {greenlee,entes,circutor,all}`, `--config <path>` (defaults to `config/config.yaml`), `--no-plot`, `--compare`, `--history`.
+
+**Retrieving and comparing past results** (no new sampling, reads from `results/`):
+```sh
+python run_test_suite.py --history --ammeter greenlee          # list all archived greenlee runs
+python run_test_suite.py --history --ammeter all --compare     # compare the latest archived run per ammeter
+```
 
 **Minimal usage example** (must be run as a module from the repo root — see [`DESIGN.md`](DESIGN.md) for why):
 ```sh
@@ -57,4 +63,4 @@ python -m pytest tests/ -m integration   # live-socket tests only
 
 ## Sample results
 
-Committed under `results/`: three archived measurement runs (one per ammeter, `results/<run_id>.json`) with matching plots (`results/plots/*.png`) from a `run_test_suite.py --ammeter all --compare` run, and a pytest run report (`results/pytest_reports/junit.xml` + a `pytest_sessionfinish`-hook-generated summary JSON) proving the test suite passes.
+Committed under `results/`: three archived measurement runs (one per ammeter, `results/<run_id>.json`) with matching plots (`results/plots/*.png`), a cross-ammeter comparison (`results/comparisons/<timestamp>.json` — stats, coefficient of variation, and 95% confidence intervals per ammeter) from the same `run_test_suite.py --ammeter all --compare` run, and a pytest run report (`results/pytest_reports/junit.xml` + a `pytest_sessionfinish`-hook-generated summary JSON) proving the test suite passes.

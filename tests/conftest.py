@@ -75,8 +75,8 @@ def pytest_sessionfinish(session, exitstatus):
 
     reports_dir = Path("results/pytest_reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    with open(reports_dir / f"{stamp}_summary.json", "w", encoding="utf-8") as f:
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+    with open(reports_dir / f"pytest_summary_{stamp}.json", "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
 

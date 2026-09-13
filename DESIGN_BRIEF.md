@@ -29,9 +29,15 @@
 
 One JSON file per test run under `results/<run_id>.json`. No database needed for this scale.
 
+`run_id` is named `<ammeter>_<date>_<time>_<milliseconds>` (e.g. `greenlee_20260913_202017_814`), not a random UUID, so a directory listing sorts by ammeter and then by time — you can actually tell what a file is and find the latest one without opening it.
+
+Trade-off: unlike a UUID, this isn't guaranteed unique (two runs in the same millisecond would clash). Guarded two ways: `ensure_unique_run_id()` appends `_2`, `_3`, ... before a colliding id is ever used, and `save_result()` refuses to overwrite an existing file as a backstop. In practice a collision can't happen here since each run takes multiple seconds, but it's guarded instead of assumed away.
+
 ## Sampling
 
-Samples are scheduled with `time.monotonic()` so timing doesn't drift over a long run. A failed sample is counted and skipped, not fatal to the whole run.
+Samples are scheduled with `time.monotonic()` so timing doesn't drift over a long run. A failed sample is counted and skipped, not fatal to the whole run. Each sample opens a new TCP connection — the emulator's server closes the connection after every single request by design, so there's no persistent-connection option to use instead.
+
+Scheduling samples carefully doesn't guarantee they land on time — the connection/send/receive itself takes a small, variable amount of time. So each result also records `timing.actual_offsets_seconds` (when each sample actually happened) and `timing.max_jitter_seconds` (the worst-case deviation from its scheduled time), so "precise timing" is something you can check in the saved results, not just something assumed. The saved plot's x-axis uses the real elapsed time too.
 
 ## Emulators run continuously
 
@@ -53,7 +59,17 @@ The same test is written once and run for all three ammeter types, instead of co
 
 ## Accuracy Assessment bonus
 
-The spec asks to compare ammeters and find the "most reliable"/"most accurate" one. There's no reference current to check against, so true accuracy can't be measured here — only precision (how consistent repeated readings are) can. `StatisticsAnalyzer.compare()` ranks ammeters by coefficient of variation (lower = more precise/consistent) and reports a 95% confidence interval per ammeter. `run_test_suite.py --compare` prints this, with a note that it's measuring precision, not accuracy.
+The spec asks to compare ammeters and find the "most reliable"/"most accurate" one. There's no reference current to check against, so true accuracy can't be measured here — only precision (how consistent repeated readings are) can. `StatisticsAnalyzer.compare()` ranks ammeters by coefficient of variation (lower = more precise/consistent) and reports a 95% confidence interval per ammeter. `run_test_suite.py --compare` prints this (with a note that it's measuring precision, not accuracy) and saves it to `results/comparisons/<timestamp>.json`.
+
+CV (not the confidence interval) is what actually drives the ranking — CI width shrinks just from taking more samples, independent of whether an ammeter is genuinely more consistent, so it would be misleading to rank by it if sample counts ever differed between ammeters. CI is shown as supporting detail per ammeter, not used to decide the ranking.
+
+## "Performance consistency evaluation" bonus
+
+Different from Accuracy Assessment above — this one is about *one* ammeter's own run, not comparing ammeters against each other. Before this, coefficient of variation only existed inside the cross-ammeter comparison, so a plain single-ammeter run had no consistency number of its own. Added `coefficient_of_variation` as a real metric in `StatisticsAnalyzer` and to the default config, so every run (live or historical) reports its own consistency automatically.
+
+## Retrieving and comparing historical results (`--history`)
+
+`ResultManager.list_results()`/`compare_results()` already read archived results off disk, but were never wired into anything runnable — dead code, same issue as `confidence_interval()` before it got wired up. Added `run_test_suite.py --history`: `--history --ammeter <type>` lists every past run for that ammeter (with mean/median/stdev/CV per run); `--history --ammeter all --compare` takes the latest archived run per ammeter and runs them through the same `StatisticsAnalyzer.compare()` used for live results, so historical and live comparisons look identical and both get saved under `results/comparisons/`.
 
 ## Cross-platform notes
 

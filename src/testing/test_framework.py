@@ -1,7 +1,6 @@
 import random
 import socket
 import time
-import uuid
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -33,19 +32,66 @@ class AmmeterTestFramework:
         ammeter_cfg = ammeters_cfg[ammeter_type]
         sampling_cfg = self.config["testing"]["sampling"]
         analysis_cfg = self.config.get("analysis", {}) or {}
-        error_injection_cfg = self.config.get("testing", {}).get("error_injection", {}) or {}
+        drop_probability = self.config.get("testing", {}).get("error_injection", {}).get("drop_probability", 0)
 
+        self.logger.info(f"Starting test run for {ammeter_type}: "
+                          f"{sampling_cfg['measurements_count']} samples @ {sampling_cfg['sampling_frequency_hz']}Hz, "
+                          f"max {sampling_cfg['total_duration_seconds']}s")
+
+        readings, sample_timestamps, errors, max_jitter_seconds = self._collect_samples(
+            ammeter_type, ammeter_cfg, sampling_cfg, drop_probability
+        )
+
+        metrics = analysis_cfg.get("statistical_metrics") or ["mean", "median", "stdev", "min", "max"]
+        statistics = StatisticsAnalyzer.compute(readings, metrics)
+
+        # Human-readable, sortable id: <ammeter_type>_<YYYYMMDD>_<HHMMSS>_<milliseconds>
+        # e.g. "greenlee_20260913_200306_123" - lexicographic sort groups by ammeter
+        # and then puts the latest run last, which a random UUID couldn't do. Unlike a
+        # UUID this isn't inherently collision-proof, so ensure_unique_run_id() checks
+        # for (and resolves) a same-millisecond collision before it's ever used.
+        run_id = self.result_manager.ensure_unique_run_id(
+            f"{ammeter_type}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]}"
+        )
+        result = {
+            "run_id": run_id,
+            "ammeter_type": ammeter_type,
+            "timestamp": datetime.now().isoformat(),
+            "config_snapshot": {"ammeter": ammeter_cfg, "sampling": sampling_cfg},
+            "raw_readings": readings,
+            "statistics": statistics,
+            "samples_requested": sampling_cfg["measurements_count"],
+            "samples_collected": len(readings),
+            "errors": errors,
+            "timing": {
+                "actual_offsets_seconds": sample_timestamps,
+                "max_jitter_seconds": max_jitter_seconds,
+            },
+        }
+
+        visualization_cfg = analysis_cfg.get("visualization", {}) or {}
+        if visualization_cfg.get("enabled") and readings:
+            from src.testing.visualization import plot_measurement_run
+            result["plot_path"] = plot_measurement_run(readings, ammeter_type, run_id, sample_timestamps)
+
+        self.result_manager.save_result(result)
+        self.logger.info(f"{ammeter_type}: collected {len(readings)}/{sampling_cfg['measurements_count']} samples, "
+                          f"{errors} errors, run_id={run_id}")
+        return result
+
+    def _collect_samples(self, ammeter_type: str, ammeter_cfg: Dict, sampling_cfg: Dict, drop_probability: float):
+        """Runs the timed sampling loop against one ammeter.
+        Returns (readings, sample_timestamps, errors, max_jitter_seconds) -
+        see run_test()'s "timing" docs for what jitter means."""
         measurements_count = sampling_cfg["measurements_count"]
         total_duration = sampling_cfg["total_duration_seconds"]
         frequency = sampling_cfg["sampling_frequency_hz"]
-        drop_probability = error_injection_cfg.get("drop_probability", 0)
 
         readings: List[float] = []
+        sample_timestamps: List[float] = []
         errors = 0
+        max_jitter_seconds = 0.0
         start_time = time.monotonic()
-
-        self.logger.info(f"Starting test run for {ammeter_type}: "
-                          f"{measurements_count} samples @ {frequency}Hz, max {total_duration}s")
 
         for i in range(measurements_count):
             if time.monotonic() - start_time >= total_duration:
@@ -60,35 +106,18 @@ class AmmeterTestFramework:
             try:
                 reading = self._sample_once(ammeter_cfg["port"], ammeter_cfg["command"], drop_probability)
                 readings.append(reading)
+                actual_offset = time.monotonic() - start_time
+                sample_timestamps.append(actual_offset)
+                # Jitter = how far this sample landed from its scheduled target_time - what
+                # makes "precise timing" a checkable claim instead of an assumption, since the
+                # scheduling loop only controls when a sample is *attempted*, not how long the
+                # TCP connect/send/recv to the emulator actually takes.
+                max_jitter_seconds = max(max_jitter_seconds, abs(actual_offset - (target_time - start_time)))
             except (ConnectionRefusedError, ConnectionError, socket.timeout, ValueError) as exc:
                 errors += 1
                 self.logger.error(f"{ammeter_type}: sample {i} failed: {exc}")
 
-        metrics = analysis_cfg.get("statistical_metrics") or ["mean", "median", "stdev", "min", "max"]
-        statistics = StatisticsAnalyzer.compute(readings, metrics)
-
-        run_id = str(uuid.uuid4())
-        result = {
-            "run_id": run_id,
-            "ammeter_type": ammeter_type,
-            "timestamp": datetime.now().isoformat(),
-            "config_snapshot": {"ammeter": ammeter_cfg, "sampling": sampling_cfg},
-            "raw_readings": readings,
-            "statistics": statistics,
-            "samples_requested": measurements_count,
-            "samples_collected": len(readings),
-            "errors": errors,
-        }
-
-        visualization_cfg = analysis_cfg.get("visualization", {}) or {}
-        if visualization_cfg.get("enabled") and readings:
-            from src.testing.visualization import plot_measurement_run
-            result["plot_path"] = plot_measurement_run(readings, ammeter_type, run_id)
-
-        self.result_manager.save_result(result)
-        self.logger.info(f"{ammeter_type}: collected {len(readings)}/{measurements_count} samples, "
-                          f"{errors} errors, run_id={run_id}")
-        return result
+        return readings, sample_timestamps, errors, max_jitter_seconds
 
     @staticmethod
     def _sample_once(port: int, command: str, drop_probability: float = 0.0, timeout: float = 2.0) -> float:

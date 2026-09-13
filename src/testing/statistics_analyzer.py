@@ -14,6 +14,12 @@ class StatisticsAnalyzer:
         "stdev": lambda d: float(np.std(d, ddof=1)) if len(d) > 1 else 0.0,
         "min": lambda d: float(np.min(d)),
         "max": lambda d: float(np.max(d)),
+        # Performance consistency evaluation (spec section 3 bonus): how tightly this
+        # single run's own readings cluster around their own mean - a per-run metric,
+        # independent of comparing against other ammeters (that's compare(), below).
+        "coefficient_of_variation": lambda d: (
+            (float(np.std(d, ddof=1)) if len(d) > 1 else 0.0) / float(np.mean(d))
+        ) if float(np.mean(d)) != 0 else float("inf"),
     }
 
     @classmethod
@@ -51,19 +57,16 @@ class StatisticsAnalyzer:
         rows = []
         for ammeter_type, result in results_by_ammeter.items():
             readings = result.get("raw_readings", [])
-            stats_dict = cls.compute(readings, ["mean", "median", "stdev", "min", "max"])
-            mean = stats_dict["mean"] or 0.0
-            stdev = stats_dict["stdev"] or 0.0
-            cv = (stdev / mean) if mean else float("inf")
+            stats_dict = cls.compute(readings, ["mean", "median", "stdev", "min", "max", "coefficient_of_variation"])
             ci_low, ci_high = cls.confidence_interval(readings)
             rows.append({
                 "ammeter_type": ammeter_type,
-                "mean": mean,
+                "mean": stats_dict["mean"] or 0.0,
                 "median": stats_dict["median"],
-                "stdev": stdev,
+                "stdev": stats_dict["stdev"] or 0.0,
                 "min": stats_dict["min"],
                 "max": stats_dict["max"],
-                "coefficient_of_variation": cv,
+                "coefficient_of_variation": stats_dict["coefficient_of_variation"],
                 "ci_95_low": ci_low,
                 "ci_95_high": ci_high,
             })

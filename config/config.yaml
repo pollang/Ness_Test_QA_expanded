@@ -18,7 +18,7 @@ ammeters:
     command: "MEASURE_CIRCUTOR -get_measurement -current"
 
 analysis:
-  statistical_metrics: [mean, median, stdev, min, max]
+  statistical_metrics: [mean, median, stdev, min, max, coefficient_of_variation]
   visualization:
     enabled: true
     plot_types: [line, histogram]
