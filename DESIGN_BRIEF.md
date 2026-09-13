@@ -39,6 +39,10 @@ Samples are scheduled with `time.monotonic()` so timing doesn't drift over a lon
 
 Scheduling samples carefully doesn't guarantee they land on time — the connection/send/receive itself takes a small, variable amount of time. So each result also records `timing.actual_offsets_seconds` (when each sample actually happened) and `timing.max_jitter_seconds` (the worst-case deviation from its scheduled time), so "precise timing" is something you can check in the saved results, not just something assumed. The saved plot's x-axis uses the real elapsed time too.
 
+## One registry for ammeter types
+
+The three ammeter names used to be hardcoded in five separate places (CLI choices, the emulator launcher, and three test files). Adding a fourth ammeter type would have meant editing all five. Fixed by making `emulator_launcher.AMMETER_CLASSES` the one canonical list everything else derives from.
+
 ## Emulators run continuously
 
 All three emulators start once, in background threads, for the whole process — they can't be cleanly stopped/restarted, so tests and the CLI just connect to whichever port they need.

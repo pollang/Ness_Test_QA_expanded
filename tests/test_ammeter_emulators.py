@@ -2,16 +2,12 @@ import socket
 
 import pytest
 
-from Ammeters.Circutor_Ammeter import CircutorAmmeter
-from Ammeters.Entes_Ammeter import EntesAmmeter
-from Ammeters.Greenlee_Ammeter import GreenleeAmmeter
+from src.utils.emulator_launcher import AMMETER_CLASSES
 from tests.constants import TEST_PORTS
 
-AMMETER_CASES = [
-    ("greenlee", GreenleeAmmeter),
-    ("entes", EntesAmmeter),
-    ("circutor", CircutorAmmeter),
-]
+# Derived from the same registry emulator_launcher.py uses, so a new ammeter
+# type added there is automatically covered here too.
+AMMETER_CASES = list(AMMETER_CLASSES.items())
 
 
 @pytest.mark.unit

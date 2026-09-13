@@ -5,7 +5,10 @@ from Ammeters.Circutor_Ammeter import CircutorAmmeter
 from Ammeters.Entes_Ammeter import EntesAmmeter
 from Ammeters.Greenlee_Ammeter import GreenleeAmmeter
 
-_AMMETER_CLASSES = {
+# Canonical ammeter_type -> class registry. Import this rather than re-listing
+# ammeter type names elsewhere (run_test_suite.py's CLI choices and the test
+# suite's parametrize lists both derive from this).
+AMMETER_CLASSES = {
     "greenlee": GreenleeAmmeter,
     "entes": EntesAmmeter,
     "circutor": CircutorAmmeter,
@@ -21,8 +24,8 @@ def start_emulators(ammeters_config: Dict[str, dict]) -> None:
     (AmmeterEmulatorBase.start_server() has no clean shutdown mechanism).
     """
     for ammeter_type, cfg in ammeters_config.items():
-        ammeter_cls = _AMMETER_CLASSES.get(ammeter_type)
+        ammeter_cls = AMMETER_CLASSES.get(ammeter_type)
         if ammeter_cls is None:
-            raise ValueError(f"Unknown ammeter_type '{ammeter_type}', expected one of {list(_AMMETER_CLASSES)}")
+            raise ValueError(f"Unknown ammeter_type '{ammeter_type}', expected one of {list(AMMETER_CLASSES)}")
         ammeter = ammeter_cls(cfg["port"])
         threading.Thread(target=ammeter.start_server, daemon=True).start()

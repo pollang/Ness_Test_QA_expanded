@@ -1,8 +1,9 @@
 import pytest
 
 from src.testing.test_framework import AmmeterTestFramework
+from src.utils.emulator_launcher import AMMETER_CLASSES
 
-AMMETER_TYPES = ["greenlee", "entes", "circutor"]
+AMMETER_TYPES = list(AMMETER_CLASSES)
 
 
 @pytest.mark.integration

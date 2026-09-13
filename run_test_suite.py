@@ -4,12 +4,12 @@ from datetime import datetime
 
 from src.testing.test_framework import AmmeterTestFramework
 from src.testing.statistics_analyzer import StatisticsAnalyzer
-from src.utils.emulator_launcher import start_emulators
+from src.utils.emulator_launcher import start_emulators, AMMETER_CLASSES
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Config-driven ammeter test runner.")
-    parser.add_argument("--ammeter", choices=["greenlee", "entes", "circutor", "all"], default="all")
+    parser.add_argument("--ammeter", choices=[*AMMETER_CLASSES, "all"], default="all")
     parser.add_argument("--config", default="config/config.yaml")
     parser.add_argument("--no-plot", action="store_true", help="Disable visualization even if config enables it.")
     parser.add_argument("--compare", action="store_true", help="Print a cross-ammeter comparison table (requires more than one ammeter run).")
