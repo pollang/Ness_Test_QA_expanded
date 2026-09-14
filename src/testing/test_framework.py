@@ -3,7 +3,7 @@ import random
 import socket
 import time
 from datetime import datetime
-from typing import Dict, List, NamedTuple, Optional
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 from src.testing.models import SamplingTiming, TestResult
 from src.testing.result_manager import ResultManager
@@ -42,15 +42,15 @@ class AmmeterTestFramework:
             self.result_manager = ResultManager(results_dir or result_management_cfg.get("results_dir", "results"))
         self.logger = logger or get_logger("ammeter_test_framework")
 
-    def run_test_session(self, ammeter_type: str) -> TestResult:
-        ammeter_cfg, sampling_cfg, analysis_cfg, drop_probability = self._load_run_config(ammeter_type)
+    def run_test_session(self, ammeter_type: str, error_probability: float = 0.0) -> TestResult:
+        ammeter_cfg, sampling_cfg, analysis_cfg = self._load_run_config(ammeter_type)
 
         self.logger.info(f"Starting test run for {ammeter_type}: "
                           f"{sampling_cfg['measurements_count']} samples @ {sampling_cfg['sampling_frequency_hz']}Hz, "
                           f"max {sampling_cfg['total_duration_seconds']}s")
 
         readings, sample_timestamps, errors, max_jitter_seconds = self._collect_samples(
-            ammeter_type, ammeter_cfg, sampling_cfg, drop_probability
+            ammeter_type, ammeter_cfg, sampling_cfg, error_probability
         )
 
         metrics = analysis_cfg.get("statistical_metrics") or ["mean", "median", "stdev", "min", "max"]
@@ -67,17 +67,16 @@ class AmmeterTestFramework:
                           f"{errors} errors, run_id={result.run_id}")
         return result
 
-    def _load_run_config(self, ammeter_type: str):
+    def _load_run_config(self, ammeter_type: str) -> Tuple[Dict, Dict, Dict]:
         """Validates ammeter_type and extracts this run's config sections.
-        Returns (ammeter_cfg, sampling_cfg, analysis_cfg, drop_probability)."""
+        Returns (ammeter_cfg, sampling_cfg, analysis_cfg)."""
         ammeters_cfg = self.config["ammeters"]
         if ammeter_type not in ammeters_cfg:
             raise ValueError(f"Unknown ammeter_type '{ammeter_type}', expected one of {list(ammeters_cfg)}")
         ammeter_cfg = ammeters_cfg[ammeter_type]
         sampling_cfg = self.config["testing"]["sampling"]
         analysis_cfg = self.config.get("analysis", {}) or {}
-        drop_probability = self.config.get("testing", {}).get("error_injection", {}).get("drop_probability", 0)
-        return ammeter_cfg, sampling_cfg, analysis_cfg, drop_probability
+        return ammeter_cfg, sampling_cfg, analysis_cfg
 
     def _build_result(
         self, ammeter_type: str, ammeter_cfg: Dict, sampling_cfg: Dict,
@@ -119,7 +118,7 @@ class AmmeterTestFramework:
             self.logger.error(f"{ammeter_type}: plotting failed, continuing without a plot: {exc}")
 
     def _collect_samples(
-        self, ammeter_type: str, ammeter_cfg: Dict, sampling_cfg: Dict, drop_probability: float
+        self, ammeter_type: str, ammeter_cfg: Dict, sampling_cfg: Dict, error_probability: float
     ) -> SamplingOutcome:
         """Runs the timed sampling loop against one ammeter.
         See run_test_session()'s "timing" docs for what jitter means."""
@@ -144,7 +143,7 @@ class AmmeterTestFramework:
                 time.sleep(sleep_for)
 
             try:
-                reading = self._sample_once(ammeter_cfg["port"], ammeter_cfg["command"], drop_probability)
+                reading = self._sample_once(ammeter_cfg["port"], ammeter_cfg["command"], error_probability)
                 readings.append(reading)
                 actual_offset = time.monotonic() - start_time
                 sample_timestamps.append(actual_offset)
@@ -157,9 +156,16 @@ class AmmeterTestFramework:
         return SamplingOutcome(readings, sample_timestamps, errors, max_jitter_seconds)
 
     @staticmethod
-    def _sample_once(port: int, command: str, drop_probability: float = 0.0, timeout: float = 2.0) -> float:
-        if drop_probability and random.random() < drop_probability:
-            raise ConnectionError("Simulated dropped reading (error_injection)")
+    def _sample_once(port: int, command: str, error_probability: float = 0.0, timeout: float = 2.0) -> float:
+        # error_probability picks one of: refuse (before any socket work), timeout
+        # (real connection, tiny timeout), corrupt (real response, corrupted before parsing)
+        simulated_mode = None
+        if error_probability and random.random() < error_probability:
+            simulated_mode = random.choice(["refuse", "timeout", "corrupt"])
+            if simulated_mode == "refuse":
+                raise ConnectionError("Simulated dropped connection (error simulation)")
+            if simulated_mode == "timeout":
+                timeout = 0.001
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(timeout)
@@ -168,4 +174,6 @@ class AmmeterTestFramework:
             data = s.recv(1024)
             if not data:
                 raise ConnectionError("No data received from ammeter")
+            if simulated_mode == "corrupt":
+                data = b"not_a_number"
             return float(data.decode("utf-8"))

@@ -1,0 +1,49 @@
+{
+  "run_id": "greenlee_20260914_184035_612",
+  "ammeter_type": "greenlee",
+  "timestamp": "2026-09-14T18:40:35.612019",
+  "config_snapshot": {
+    "ammeter": {
+      "port": 5001,
+      "command": "MEASURE_GREENLEE -get_measurement"
+    },
+    "sampling": {
+      "measurements_count": 20,
+      "total_duration_seconds": 10,
+      "sampling_frequency_hz": 5
+    }
+  },
+  "raw_readings": [
+    0.08971440642226922,
+    0.025673758186575784,
+    0.19723603455315825,
+    0.04675693908447954,
+    0.030706854239110036,
+    0.12059072450573066,
+    0.08355370713714211
+  ],
+  "statistics": {
+    "mean": 0.08489034630406651,
+    "median": 0.08355370713714211,
+    "stdev": 0.06030165931795901,
+    "min": 0.025673758186575784,
+    "max": 0.19723603455315825,
+    "coefficient_of_variation": 0.7103476654691225
+  },
+  "samples_requested": 20,
+  "samples_collected": 7,
+  "errors": 13,
+  "timing": {
+    "actual_offsets_seconds": [
+      0.5939999999827705,
+      1.0309999999590218,
+      2.2189999999827705,
+      2.60999999998603,
+      3.0,
+      3.202999999979511,
+      3.7969999999622814
+    ],
+    "max_jitter_seconds": 0.030999999959021807
+  },
+  "plot_path": null
+}

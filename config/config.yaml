@@ -3,8 +3,6 @@ testing:
     measurements_count: 20
     total_duration_seconds: 10
     sampling_frequency_hz: 5
-  error_injection:
-    drop_probability: 0  # 0 = disabled; set > 0 (e.g. 0.1) to exercise the framework's error-handling path
 
 ammeters:
   greenlee:

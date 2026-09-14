@@ -5,15 +5,26 @@ This project provides emulators for different types of ammeters: Greenlee, ENTES
 ## Project Structure
 
 - `Ammeters/`
-  - `base_ammeter.py`: Base class for all ammeter emulators.
-  - `Greenlee_Ammeter.py`: Emulator for the Greenlee ammeter.
-  - `Entes_Ammeter.py`: Emulator for the ENTES ammeter.
+  - `main.py`: Main script to start the ammeter emulators and request current measurements.
   - `Circutor_Ammeter.py`: Emulator for the CIRCUTOR ammeter.
+  - `Entes_Ammeter.py`: Emulator for the ENTES ammeter.
+  - `Greenlee_Ammeter.py`: Emulator for the Greenlee ammeter.
+  - `base_ammeter.py`: Base class for all ammeter emulators.
   - `client.py`: Client to request current measurements from the ammeter emulators.
-
-(For `main.py`, `config/`, `src/`, and the rest of the testing framework built around these emulators, see the top-level [README.md](../README.md).)
+- `config/`
+  - `config.yaml`: Configuration file for the ammeter emulators.
+- `examples/`
+  - `run_test.py`: super lyze example for run test **don't use it**.
+- `src/`
+  - `testing/`
+    - `AmmeterTester.py`: Class to test the ammeter emulators.
+  - `utils/`
+    - `config.py`: Configuration settings.
+    - `logger.py`: Logging setup.
+    - `Utils.py`: Utility functions, including `generate_random_float`.
 
 ## Usage
+
 
 ### Greenlee Ammeter
 

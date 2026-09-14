@@ -1,0 +1,15 @@
+2026-09-14 18:40:31,817 - test_ammeter_test_framework - INFO - Starting test run for greenlee: 20 samples @ 5Hz, max 10s
+2026-09-14 18:40:31,818 - test_ammeter_test_framework - ERROR - greenlee: sample 0 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:32,020 - test_ammeter_test_framework - ERROR - greenlee: sample 1 failed: Simulated dropped connection (error simulation)
+2026-09-14 18:40:32,244 - test_ammeter_test_framework - ERROR - greenlee: sample 2 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:32,645 - test_ammeter_test_framework - ERROR - greenlee: sample 4 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:33,028 - test_ammeter_test_framework - ERROR - greenlee: sample 6 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:33,227 - test_ammeter_test_framework - ERROR - greenlee: sample 7 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:33,441 - test_ammeter_test_framework - ERROR - greenlee: sample 8 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:33,627 - test_ammeter_test_framework - ERROR - greenlee: sample 9 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:33,829 - test_ammeter_test_framework - ERROR - greenlee: sample 10 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:34,212 - test_ammeter_test_framework - ERROR - greenlee: sample 12 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:34,616 - test_ammeter_test_framework - ERROR - greenlee: sample 14 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:35,221 - test_ammeter_test_framework - ERROR - greenlee: sample 17 failed: Simulated dropped connection (error simulation)
+2026-09-14 18:40:35,418 - test_ammeter_test_framework - ERROR - greenlee: sample 18 failed: could not convert string to float: 'not_a_number'
+2026-09-14 18:40:35,614 - test_ammeter_test_framework - INFO - greenlee: collected 7/20 samples, 13 errors, run_id=greenlee_20260914_184035_612

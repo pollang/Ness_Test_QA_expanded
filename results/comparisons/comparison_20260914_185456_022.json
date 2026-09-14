@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-09-14T18:54:56.020478",
+  "source": "live",
+  "ammeter_run_ids": {
+    "greenlee": "greenlee_20260914_185447_117",
+    "entes": "entes_20260914_185451_785",
+    "circutor": "circutor_20260914_185455_812"
+  },
+  "comparison": [
+    {
+      "ammeter_type": "entes",
+      "mean": 46.919857399255534,
+      "median": 42.92491027834859,
+      "stdev": 25.63070447644368,
+      "min": 11.195663481243592,
+      "max": 113.34335147478065,
+      "coefficient_of_variation": 0.5462656090009846,
+      "ci_95_low": 34.92431845758837,
+      "ci_95_high": 58.9153963409227
+    },
+    {
+      "ammeter_type": "circutor",
+      "mean": 0.02472492985392879,
+      "median": 0.025507165844316657,
+      "stdev": 0.014909498722058464,
+      "min": 0.005787973387585432,
+      "max": 0.058921259035427526,
+      "coefficient_of_variation": 0.6030148036876775,
+      "ci_95_low": 0.017747069659506044,
+      "ci_95_high": 0.03170279004835153
+    },
+    {
+      "ammeter_type": "greenlee",
+      "mean": 0.37435713814241534,
+      "median": 0.13901029863558348,
+      "stdev": 0.9262715115842372,
+      "min": 0.027590868980931965,
+      "max": 4.271223190931972,
+      "coefficient_of_variation": 2.474299050848762,
+      "ci_95_low": -0.05915127353536315,
+      "ci_95_high": 0.8078655498201939
+    }
+  ],
+  "conclusion": "Most precise/consistent measurement method: 'entes' (coefficient of variation = 0.546, lowest among the ammeters compared). This reflects measurement precision, not accuracy - see the note above.",
+  "most_precise_ammeter": "entes"
+}

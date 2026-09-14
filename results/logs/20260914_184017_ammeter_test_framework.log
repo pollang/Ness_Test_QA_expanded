@@ -1,0 +1,6 @@
+2026-09-14 18:40:17,678 - test_ammeter_test_framework - INFO - Starting test run for greenlee: 4 samples @ 20Hz, max 5s
+2026-09-14 18:40:17,844 - test_ammeter_test_framework - INFO - greenlee: collected 4/4 samples, 0 errors, run_id=greenlee_20260914_184017_843
+2026-09-14 18:40:17,860 - test_ammeter_test_framework - INFO - Starting test run for entes: 4 samples @ 20Hz, max 5s
+2026-09-14 18:40:18,051 - test_ammeter_test_framework - INFO - entes: collected 4/4 samples, 0 errors, run_id=entes_20260914_184018_049
+2026-09-14 18:40:18,073 - test_ammeter_test_framework - INFO - Starting test run for circutor: 4 samples @ 20Hz, max 5s
+2026-09-14 18:40:18,244 - test_ammeter_test_framework - INFO - circutor: collected 4/4 samples, 0 errors, run_id=circutor_20260914_184018_244

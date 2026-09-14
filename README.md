@@ -1,10 +1,10 @@
 # Ammeter Testing Framework — Usage Instructions
 
-A unified testing framework built around the ammeter emulators in [`Ammeters/`](Ammeters/README.md) (Greenlee, ENTES, CIRCUTOR): it samples them, computes statistics, archives results, plots measurements, and compares ammeters against each other. For what each emulator does, its port/command, and its physics formula, see [`Ammeters/README.md`](Ammeters/README.md). For the bugs found and fixed and the reasoning behind every design decision, see [`DESIGN.md`](DESIGN.md). For the test strategy, see [`TestPlan.md`](TestPlan.md).
+A unified testing framework built around the ammeter emulators in [`Ammeters/`](AMMETERS_README.md) (Greenlee, ENTES, CIRCUTOR): it samples them, computes statistics, archives results, plots measurements, and compares ammeters against each other. For what each emulator does, its port/command, and its physics formula, see [`AMMETERS_README.md`](AMMETERS_README.md). For the bugs found and fixed and the reasoning behind every design decision, see [`DESIGN_BRIEF.md`](DESIGN_BRIEF.md).
 
 ## Project Structure
 
-- `Ammeters/` — the ammeter emulators and client (see [`Ammeters/README.md`](Ammeters/README.md)).
+- `Ammeters/` — the ammeter emulators and client (see [`AMMETERS_README.md`](AMMETERS_README.md)).
 - `config/config.yaml` — config-driven settings for the testing framework (ammeters, sampling, analysis, result management).
 - `src/`
   - `testing/`
@@ -16,7 +16,7 @@ A unified testing framework built around the ammeter emulators in [`Ammeters/`](
     - `config.py`, `logger.py`, `Utils.py`, `emulator_launcher.py` (shared emulator-thread startup).
 - `run_test_suite.py` — config-driven CLI, the main way to exercise the full framework.
 - `examples/run_tests.py` — not in use.
-- `tests/` — pytest suite verifying the ammeter emulator system (see [`TestPlan.md`](TestPlan.md)).
+- `tests/` — pytest suite verifying the ammeter emulator system, and also demonstrating `AmmeterTestFramework` usage through real fixtures.
 - `main.py` — starts all three emulators and requests one measurement from each; the quickest smoke test.
 
 ## Setup
@@ -28,7 +28,7 @@ source .venv/bin/activate     # macOS/Linux
 pip install -r requirements.txt
 ```
 
-Installed libraries: `numpy`, `scipy`, `matplotlib`, `seaborn`, `pyyaml`, `pandas` (all pre-declared), plus `pytest` (added for the test suite). See [`DESIGN.md`](DESIGN.md) for why each is used.
+Installed libraries: `numpy`, `scipy`, `matplotlib`, `seaborn`, `pyyaml`, `pandas` (all pre-declared), plus `pytest` (added for the test suite). See [`DESIGN_BRIEF.md`](DESIGN_BRIEF.md) for why each is used.
 
 ## Running things
 

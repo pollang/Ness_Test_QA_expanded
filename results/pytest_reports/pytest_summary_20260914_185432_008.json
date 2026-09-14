@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-09-14T18:54:32.008683",
+  "exit_status": 0,
+  "total": 3,
+  "passed": 3,
+  "failed": 0,
+  "skipped": 0,
+  "duration_seconds": 4.330040216445923,
+  "outcomes": {
+    "passed": [
+      "tests/test_test_framework.py::test_run_test_session_end_to_end_per_ammeter[greenlee]",
+      "tests/test_test_framework.py::test_run_test_session_end_to_end_per_ammeter[entes]",
+      "tests/test_test_framework.py::test_run_test_session_end_to_end_per_ammeter[circutor]"
+    ]
+  }
+}

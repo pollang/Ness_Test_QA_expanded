@@ -18,6 +18,9 @@ def parse_args():
     parser.add_argument("--history", action="store_true",
                          help="Show archived past results instead of running new samples. "
                               "Combine with --compare to compare the most recent archived run per ammeter.")
+    parser.add_argument("--simulate-errors", type=float, default=0.0, metavar="PROBABILITY",
+                         help="Force this fraction of samples (0.0-1.0) to hit a real failure mode "
+                              "(refused connection, timeout, or corrupt data) to exercise error handling.")
     return parser.parse_args()
 
 
@@ -98,14 +101,14 @@ def run_history(framework: AmmeterTestFramework, ammeter_types: list, do_compare
             print("\n(Skipping historical comparison: fewer than 2 ammeter types have archived results.)")
 
 
-def run_live(framework: AmmeterTestFramework, ammeter_types: list, do_compare: bool) -> None:
+def run_live(framework: AmmeterTestFramework, ammeter_types: list, do_compare: bool, error_probability: float = 0.0) -> None:
     start_emulators(framework.config["ammeters"])
     time.sleep(1)  # let the emulator threads bind their sockets
 
     results = {}
     for ammeter_type in ammeter_types:
         print(f"Testing {ammeter_type} ammeter...")
-        result = framework.run_test_session(ammeter_type)
+        result = framework.run_test_session(ammeter_type, error_probability=error_probability)
         results[ammeter_type] = result
         print_result(ammeter_type, result)
 
@@ -125,7 +128,7 @@ def main():
     if args.history:
         run_history(framework, ammeter_types, args.compare)
     else:
-        run_live(framework, ammeter_types, args.compare)
+        run_live(framework, ammeter_types, args.compare, error_probability=args.simulate_errors)
 
 
 if __name__ == "__main__":

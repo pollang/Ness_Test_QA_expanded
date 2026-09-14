@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-09-14T18:40:18.244881",
+  "exit_status": 0,
+  "total": 12,
+  "passed": 12,
+  "failed": 0,
+  "skipped": 0,
+  "duration_seconds": 3.23290753364563,
+  "outcomes": {
+    "passed": [
+      "tests/test_ammeter_emulators.py::test_get_current_command_matches_config[greenlee-GreenleeAmmeter]",
+      "tests/test_ammeter_emulators.py::test_get_current_command_matches_config[entes-EntesAmmeter]",
+      "tests/test_ammeter_emulators.py::test_get_current_command_matches_config[circutor-CircutorAmmeter]",
+      "tests/test_ammeter_emulators.py::test_exact_command_match_returns_data[greenlee-GreenleeAmmeter]",
+      "tests/test_ammeter_emulators.py::test_exact_command_match_returns_data[entes-EntesAmmeter]",
+      "tests/test_ammeter_emulators.py::test_exact_command_match_returns_data[circutor-CircutorAmmeter]",
+      "tests/test_ammeter_emulators.py::test_mismatched_command_returns_no_data[greenlee-GreenleeAmmeter]",
+      "tests/test_ammeter_emulators.py::test_mismatched_command_returns_no_data[entes-EntesAmmeter]",
+      "tests/test_ammeter_emulators.py::test_mismatched_command_returns_no_data[circutor-CircutorAmmeter]",
+      "tests/test_test_framework.py::test_run_test_session_end_to_end_per_ammeter[greenlee]",
+      "tests/test_test_framework.py::test_run_test_session_end_to_end_per_ammeter[entes]",
+      "tests/test_test_framework.py::test_run_test_session_end_to_end_per_ammeter[circutor]"
+    ]
+  }
+}

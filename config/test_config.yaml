@@ -3,7 +3,7 @@
 # never pay matplotlib/seaborn's import cost.
 #
 # The `ammeters` section is intentionally omitted here - the fixture injects
-# TEST_PORTS (tests/constants.py) instead, so ports/commands have exactly one
+# TEST_AMMETERS (tests/constants.py) instead, so ports/commands have exactly one
 # source of truth and can't drift out of sync with this file.
 
 testing:

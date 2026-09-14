@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 from src.utils.emulator_launcher import start_emulators
-from tests.constants import TEST_PORTS
+from tests.constants import TEST_AMMETERS
 
 
 @pytest.fixture(scope="session")
@@ -15,22 +15,22 @@ def running_emulators():
     """Starts real emulator instances on dedicated test ports (15001-15003),
     distinct from main.py's production/demo ports (5001-5003), for the life
     of the test session."""
-    start_emulators(TEST_PORTS)
+    start_emulators(TEST_AMMETERS)
     time.sleep(1)  # let the emulator threads bind their sockets
-    return TEST_PORTS
+    return TEST_AMMETERS
 
 
 @pytest.fixture
 def test_config_path(tmp_path):
-    """Loads the static tests/test_config.yaml (readable, checked into the repo),
-    injects the canonical TEST_PORTS as the ammeters section (single source of
+    """Loads the static config/test_config.yaml (readable, checked into the repo),
+    injects the canonical TEST_AMMETERS as the ammeters section (single source of
     truth, can't drift out of sync with tests/constants.py), and points
     results_dir at tmp_path (so tests never write into the real results/
     folder). Returns the path to the merged config, written to a temp file."""
-    static_config_path = Path(__file__).parent / "test_config.yaml"
+    static_config_path = Path(__file__).parent.parent / "config" / "test_config.yaml"
     with open(static_config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
-    config["ammeters"] = TEST_PORTS
+    config["ammeters"] = TEST_AMMETERS
     config["result_management"]["results_dir"] = str(tmp_path / "results")
 
     path = tmp_path / "test_config.yaml"
