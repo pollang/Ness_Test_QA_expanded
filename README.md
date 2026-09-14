@@ -41,7 +41,7 @@ python main.py
 ```sh
 python run_test_suite.py --ammeter all --compare
 ```
-Options: `--ammeter {greenlee,entes,circutor,all}`, `--config <path>` (defaults to `config/config.yaml`), `--no-plot`, `--compare`, `--history`.
+Options: `--ammeter {greenlee,entes,circutor,all}`, `--config <path>` (defaults to `config/config.yaml`), `--no-plot`, `--compare`, `--history`, `--simulate-errors PROBABILITY` (force a fraction of samples to hit a real refused connection, timeout, or corrupt response).
 
 **Retrieving and comparing past results** (no new sampling, reads from `results/`):
 ```sh
