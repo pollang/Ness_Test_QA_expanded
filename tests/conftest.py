@@ -22,23 +22,17 @@ def running_emulators():
 
 @pytest.fixture
 def test_config_path(tmp_path):
-    """A config.yaml pointing at the test-port emulators with fast sampling,
-    so end-to-end tests don't touch the real config/config.yaml."""
-    config = {
-        "testing": {
-            "sampling": {
-                "measurements_count": 3,
-                "total_duration_seconds": 5,
-                "sampling_frequency_hz": 20,
-            },
-        },
-        "ammeters": TEST_PORTS,
-        "analysis": {
-            "statistical_metrics": ["mean", "median", "stdev", "min", "max"],
-            "visualization": {"enabled": False, "plot_types": []},
-        },
-        "result_management": {"results_dir": str(tmp_path / "results"), "keep_raw_readings": True},
-    }
+    """Loads the static tests/test_config.yaml (readable, checked into the repo),
+    injects the canonical TEST_PORTS as the ammeters section (single source of
+    truth, can't drift out of sync with tests/constants.py), and points
+    results_dir at tmp_path (so tests never write into the real results/
+    folder). Returns the path to the merged config, written to a temp file."""
+    static_config_path = Path(__file__).parent / "test_config.yaml"
+    with open(static_config_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    config["ammeters"] = TEST_PORTS
+    config["result_management"]["results_dir"] = str(tmp_path / "results")
+
     path = tmp_path / "test_config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.safe_dump(config, f)

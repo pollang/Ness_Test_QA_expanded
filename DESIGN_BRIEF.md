@@ -58,7 +58,7 @@ All three emulators start once, in background threads, for the whole process —
 ## `tests/conftest.py`
 
 - `running_emulators` fixture: starts all three emulators once per test session, on separate test-only ports (15001-15003), so real tests and a manual `main.py` run never collide.
-- `test_config_path` fixture: writes a throwaway config file (fast sampling, results go to a temp folder), so tests never touch the real `config/config.yaml` or `results/`.
+- `test_config_path` fixture: loads the static `tests/test_config.yaml` (fast sampling, visualization off), injects the canonical `TEST_PORTS` as the ammeters section, points results at a temp folder, writes the merged config to a temp file. Moved from an inline Python dict to a real checked-in file for readability; ports and results dir stay runtime-injected since they genuinely need to vary per run. Logger output location is untouched - it was never config-driven, nothing to isolate there.
 - `pytest_sessionfinish` hook: writes a JSON summary of the test run to `results/pytest_reports/` after the whole suite finishes — pairs with `--junitxml` as the pytest "sample test results."
 
 ## Why `@pytest.mark.parametrize`
@@ -89,7 +89,13 @@ Different from Accuracy Assessment above — this one is about *one* ammeter's o
 
 ## Code quality cleanup
 
-Cleaned up during a code-quality pass: the CV metric's dense one-line lambda became a small named function; `_collect_samples()`'s bare 4-tuple return became a `NamedTuple` (self-documenting, same unpacking still works); Hebrew comments in `logger.py`/`config.py` translated to English; an unused `import datetime` removed from `base_ammeter.py`; `run_test()` (~40 lines, too many responsibilities) split into `_load_run_config()`, `_build_result()`, and `_maybe_plot()`, leaving it a ~24-line orchestrator.
+Cleaned up during a code-quality pass: the CV metric's dense one-line lambda became a small named function; `_collect_samples()`'s bare 4-tuple return became a `NamedTuple` (self-documenting, same unpacking still works); Hebrew comments in `logger.py`/`config.py` translated to English; an unused `import datetime` removed from `base_ammeter.py`; `run_test_session()` (~40 lines, too many responsibilities) split into `_load_run_config()`, `_build_result()`, and `_maybe_plot()`, leaving it a ~24-line orchestrator.
+
+Also renamed: `run_test()` -> `run_test_session()`. It doesn't "test" anything in the pass/fail sense - it samples, computes stats, archives, and optionally plots. "Session" makes that breadth clear while keeping "test" for traceability to the spec's own vocabulary.
+
+## Removed a test that checked our own code, not the SUT
+
+`test_run_test_unknown_ammeter_raises_value_error` only checked a plain input-validation `if/raise` inside the framework - never touched the network or an emulator. That's the same "framework internals" category `TestPlan.md` already excludes for other reasons; keeping this one was an inconsistency. Removed, `TestPlan.md` updated to match.
 
 ## `AmmeterTestFramework` now accepts an injected `ResultManager`/logger
 
@@ -97,7 +103,7 @@ Cleaned up during a code-quality pass: the CV metric's dense one-line lambda bec
 
 ## Result: `Dict` → `TestResult` dataclass
 
-The result dict was the framework's most-used structure (produced by `run_test()`, saved/loaded, compared, printed, tested) with no enforced shape and no typo protection. Replaced with `TestResult`/`SamplingTiming` dataclasses in a new `src/testing/models.py` (`dataclasses` is stdlib, not a new dependency). Attribute access (`result.run_id`) everywhere instead of `result["run_id"]`.
+The result dict was the framework's most-used structure (produced by `run_test_session()`, saved/loaded, compared, printed, tested) with no enforced shape and no typo protection. Replaced with `TestResult`/`SamplingTiming` dataclasses in a new `src/testing/models.py` (`dataclasses` is stdlib, not a new dependency). Attribute access (`result.run_id`) everywhere instead of `result["run_id"]`.
 
 Only wrinkle: JSON only knows plain dicts, not class instances, so `TestResult.to_dict()`/`from_dict()` handle the conversion — used only inside `ResultManager`, so everywhere else (CLI, `compare()`, tests) just uses `TestResult` objects directly, live or loaded from disk. Verified: on-disk JSON shape unchanged, and `--history`/`--compare` (which loads `TestResult`s back off disk) works identically to the live path.
 
@@ -107,7 +113,7 @@ Only wrinkle: JSON only knows plain dicts, not class instances, so `TestResult.t
 
 ## Error handling: plotting can't lose archived data anymore
 
-`run_test()` used to plot before saving, with no error handling - a plotting failure meant the whole run's data was never archived. Reordering alone doesn't fix it cleanly (the saved JSON would miss `plot_path`, and saving twice trips the run_id overwrite guard). Fixed with a `try/except` around just the plotting call: it still runs before the single save, but a failure there is logged and the result is saved anyway, just without `plot_path`.
+`run_test_session()` used to plot before saving, with no error handling - a plotting failure meant the whole run's data was never archived. Reordering alone doesn't fix it cleanly (the saved JSON would miss `plot_path`, and saving twice trips the run_id overwrite guard). Fixed with a `try/except` around just the plotting call: it still runs before the single save, but a failure there is logged and the result is saved anyway, just without `plot_path`.
 
 ## Environment
 

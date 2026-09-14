@@ -10,7 +10,7 @@ class SamplingTiming:
 
 @dataclass
 class TestResult:
-    """One ammeter test run - what AmmeterTestFramework.run_test() returns,
+    """One ammeter test run - what AmmeterTestFramework.run_test_session() returns,
     and what gets archived to/loaded from results/<run_id>.json."""
     run_id: str
     ammeter_type: str

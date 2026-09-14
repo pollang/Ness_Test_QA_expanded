@@ -8,7 +8,7 @@ A unified testing framework built around the ammeter emulators in [`Ammeters/`](
 - `config/config.yaml` — config-driven settings for the testing framework (ammeters, sampling, analysis, result management).
 - `src/`
   - `testing/`
-    - `test_framework.py` — `AmmeterTestFramework`, the unified measurement API (`run_test(ammeter_type) -> Dict`).
+    - `test_framework.py` — `AmmeterTestFramework`, the unified measurement API (`run_test_session(ammeter_type) -> TestResult`).
     - `statistics_analyzer.py` — mean/median/stdev/min/max, cross-ammeter comparison, confidence intervals.
     - `result_manager.py` — JSON-file result archiving (save/load/list/compare by run ID).
     - `visualization.py` — per-run line + histogram plots.

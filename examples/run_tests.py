@@ -21,7 +21,7 @@ def main():
 
     for ammeter_type in framework.config["ammeters"]:
         print(f"Testing {ammeter_type} ammeter...")
-        result = framework.run_test(ammeter_type)
+        result = framework.run_test_session(ammeter_type)
         print(f"Results for {ammeter_type}: {result.statistics}")
 
 

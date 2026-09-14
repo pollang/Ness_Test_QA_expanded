@@ -21,7 +21,7 @@ class SamplingOutcome(NamedTuple):
 
 class AmmeterTestFramework:
     """
-    Unified measurement API: the same run_test(ammeter_type) call works across
+    Unified measurement API: the same run_test_session(ammeter_type) call works across
     all configured ammeter types (Greenlee, ENTES, CIRCUTOR) and always returns
     a result dict with the same shape, regardless of each ammeter's underlying
     protocol/port/physics.
@@ -42,7 +42,7 @@ class AmmeterTestFramework:
             self.result_manager = ResultManager(results_dir or result_management_cfg.get("results_dir", "results"))
         self.logger = logger or get_logger("ammeter_test_framework")
 
-    def run_test(self, ammeter_type: str) -> TestResult:
+    def run_test_session(self, ammeter_type: str) -> TestResult:
         ammeter_cfg, sampling_cfg, analysis_cfg, drop_probability = self._load_run_config(ammeter_type)
 
         self.logger.info(f"Starting test run for {ammeter_type}: "
@@ -122,7 +122,7 @@ class AmmeterTestFramework:
         self, ammeter_type: str, ammeter_cfg: Dict, sampling_cfg: Dict, drop_probability: float
     ) -> SamplingOutcome:
         """Runs the timed sampling loop against one ammeter.
-        See run_test()'s "timing" docs for what jitter means."""
+        See run_test_session()'s "timing" docs for what jitter means."""
         measurements_count = sampling_cfg["measurements_count"]
         total_duration = sampling_cfg["total_duration_seconds"]
         frequency = sampling_cfg["sampling_frequency_hz"]

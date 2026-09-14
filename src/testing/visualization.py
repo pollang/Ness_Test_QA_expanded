@@ -19,7 +19,7 @@ def plot_measurement_run(
     """Saves a line plot (current vs. actual elapsed time) and a histogram for one
     test run to a single PNG, returning the saved file path. `sample_timestamps`
     are each sample's actual time offset (seconds) from the run's start, as
-    recorded by AmmeterTestFramework.run_test - falls back to sample index if
+    recorded by AmmeterTestFramework.run_test_session - falls back to sample index if
     not provided."""
     Path(plots_dir).mkdir(parents=True, exist_ok=True)
     fig, (ax_line, ax_hist) = plt.subplots(1, 2, figsize=(10, 4))
@@ -40,7 +40,7 @@ def plot_measurement_run(
     fig.suptitle(f"Run {run_id}")
     fig.tight_layout()
 
-    # run_id already embeds the ammeter type (see AmmeterTestFramework.run_test), so
+    # run_id already embeds the ammeter type (see AmmeterTestFramework.run_test_session), so
     # the filename doesn't need to repeat it.
     path = Path(plots_dir) / f"{run_id}.png"
     fig.savefig(path)

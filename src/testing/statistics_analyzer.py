@@ -50,7 +50,7 @@ class StatisticsAnalyzer:
         """
         Builds a comparison table across ammeter types.
         `results_by_ammeter` maps ammeter_type -> TestResult (as produced by
-        AmmeterTestFramework.run_test or ResultManager.list_results).
+        AmmeterTestFramework.run_test_session or ResultManager.list_results).
 
         Returns a DataFrame indexed by ammeter_type, sorted by coefficient of
         variation (stdev/mean) ascending - i.e. by measurement PRECISION

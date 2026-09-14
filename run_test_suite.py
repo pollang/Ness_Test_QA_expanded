@@ -105,7 +105,7 @@ def run_live(framework: AmmeterTestFramework, ammeter_types: list, do_compare: b
     results = {}
     for ammeter_type in ammeter_types:
         print(f"Testing {ammeter_type} ammeter...")
-        result = framework.run_test(ammeter_type)
+        result = framework.run_test_session(ammeter_type)
         results[ammeter_type] = result
         print_result(ammeter_type, result)
 

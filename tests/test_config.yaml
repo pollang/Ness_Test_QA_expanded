@@ -1,0 +1,25 @@
+# Static test config, used by tests/conftest.py's test_config_path fixture.
+# Fast sampling so the pytest suite runs quickly; visualization off so tests
+# never pay matplotlib/seaborn's import cost.
+#
+# The `ammeters` section is intentionally omitted here - the fixture injects
+# TEST_PORTS (tests/constants.py) instead, so ports/commands have exactly one
+# source of truth and can't drift out of sync with this file.
+
+testing:
+  sampling:
+    measurements_count: 4
+    total_duration_seconds: 5
+    sampling_frequency_hz: 20
+
+analysis:
+  statistical_metrics: [mean, median, stdev, min, max]
+  visualization:
+    enabled: false
+    plot_types: []
+
+result_management:
+  # overridden by the fixture to a tmp_path, so tests never write into the
+  # real results/ folder
+  results_dir: results
+  keep_raw_readings: true
