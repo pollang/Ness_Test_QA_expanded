@@ -12,9 +12,9 @@ def test_run_test_end_to_end_per_ammeter(running_emulators, test_config_path, am
     framework = AmmeterTestFramework(config_path=test_config_path)
     result = framework.run_test(ammeter_type)
 
-    assert result["ammeter_type"] == ammeter_type
-    assert result["samples_collected"] == result["samples_requested"] == 3
-    assert result["errors"] == 0
+    assert result.ammeter_type == ammeter_type
+    assert result.samples_collected == result.samples_requested == 3
+    assert result.errors == 0
 
 
 @pytest.mark.integration

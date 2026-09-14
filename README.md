@@ -15,7 +15,7 @@ A unified testing framework built around the ammeter emulators in [`Ammeters/`](
   - `utils/`
     - `config.py`, `logger.py`, `Utils.py`, `emulator_launcher.py` (shared emulator-thread startup).
 - `run_test_suite.py` — config-driven CLI, the main way to exercise the full framework.
-- `examples/run_tests.py` — a short, literate usage example.
+- `examples/run_tests.py` — not in use.
 - `tests/` — pytest suite verifying the ammeter emulator system (see [`TestPlan.md`](TestPlan.md)).
 - `main.py` — starts all three emulators and requests one measurement from each; the quickest smoke test.
 
@@ -47,11 +47,6 @@ Options: `--ammeter {greenlee,entes,circutor,all}`, `--config <path>` (defaults 
 ```sh
 python run_test_suite.py --history --ammeter greenlee          # list all archived greenlee runs
 python run_test_suite.py --history --ammeter all --compare     # compare the latest archived run per ammeter
-```
-
-**Minimal usage example** (must be run as a module from the repo root — see [`DESIGN.md`](DESIGN.md) for why):
-```sh
-python -m examples.run_tests
 ```
 
 **Running tests**:

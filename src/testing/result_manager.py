@@ -3,6 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from src.testing.models import TestResult
+
 
 class ResultManager:
     """Archives ammeter test-run results as one JSON file per run under results_dir."""
@@ -12,14 +14,14 @@ class ResultManager:
         self.results_dir.mkdir(parents=True, exist_ok=True)
         self.comparisons_dir = self.results_dir / "comparisons"
 
-    def save_result(self, result: Dict) -> str:
-        run_id = result["run_id"]
+    def save_result(self, result: TestResult) -> str:
+        run_id = result.run_id
         path = self.results_dir / f"{run_id}.json"
         if path.exists():
             # run_id is timestamp-based, not a UUID, so it isn't collision-proof
             raise FileExistsError(f"A result already exists at {path} - refusing to overwrite it (run_id collision)")
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(result, f, indent=2)
+            json.dump(result.to_dict(), f, indent=2)
         return run_id
 
     def ensure_unique_run_id(self, run_id: str) -> str:
@@ -32,17 +34,17 @@ class ResultManager:
             suffix += 1
         return f"{run_id}_{suffix}"
 
-    def load_result(self, run_id: str) -> Dict:
+    def load_result(self, run_id: str) -> TestResult:
         path = self.results_dir / f"{run_id}.json"
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            return TestResult.from_dict(json.load(f))
 
-    def list_results(self, ammeter_type: Optional[str] = None) -> List[Dict]:
+    def list_results(self, ammeter_type: Optional[str] = None) -> List[TestResult]:
         results = []
         for path in sorted(self.results_dir.glob("*.json")):
             with open(path, "r", encoding="utf-8") as f:
-                result = json.load(f)
-            if ammeter_type is None or result.get("ammeter_type") == ammeter_type:
+                result = TestResult.from_dict(json.load(f))
+            if ammeter_type is None or result.ammeter_type == ammeter_type:
                 results.append(result)
         return results
 

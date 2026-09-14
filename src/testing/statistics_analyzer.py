@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats as scipy_stats
 
+from src.testing.models import TestResult
+
 
 def _coefficient_of_variation(readings: List[float]) -> float:
     """How tightly a single run's readings cluster around their own mean."""
@@ -44,11 +46,11 @@ class StatisticsAnalyzer:
         return (mean - margin, mean + margin)
 
     @classmethod
-    def compare(cls, results_by_ammeter: Dict[str, Dict]) -> pd.DataFrame:
+    def compare(cls, results_by_ammeter: Dict[str, TestResult]) -> pd.DataFrame:
         """
         Builds a comparison table across ammeter types.
-        `results_by_ammeter` maps ammeter_type -> result dict (as produced by
-        AmmeterTestFramework.run_test), each containing a "raw_readings" list.
+        `results_by_ammeter` maps ammeter_type -> TestResult (as produced by
+        AmmeterTestFramework.run_test or ResultManager.list_results).
 
         Returns a DataFrame indexed by ammeter_type, sorted by coefficient of
         variation (stdev/mean) ascending - i.e. by measurement PRECISION
@@ -60,7 +62,7 @@ class StatisticsAnalyzer:
         """
         rows = []
         for ammeter_type, result in results_by_ammeter.items():
-            readings = result.get("raw_readings", [])
+            readings = result.raw_readings
             stats_dict = cls.compute(readings, ["mean", "median", "stdev", "min", "max", "coefficient_of_variation"])
             ci_low, ci_high = cls.confidence_interval(readings)
             rows.append({

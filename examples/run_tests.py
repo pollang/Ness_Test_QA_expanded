@@ -1,3 +1,5 @@
+# not in use
+
 """Minimal usage example for AmmeterTestFramework. For the fuller config-driven
 CLI (ammeter selection, --compare, --no-plot), see run_test_suite.py instead.
 
@@ -20,7 +22,7 @@ def main():
     for ammeter_type in framework.config["ammeters"]:
         print(f"Testing {ammeter_type} ammeter...")
         result = framework.run_test(ammeter_type)
-        print(f"Results for {ammeter_type}: {result['statistics']}")
+        print(f"Results for {ammeter_type}: {result.statistics}")
 
 
 if __name__ == "__main__":

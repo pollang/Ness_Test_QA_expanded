@@ -1,7 +1,9 @@
 import argparse
 import time
 from datetime import datetime
+from typing import Dict, List
 
+from src.testing.models import TestResult
 from src.testing.test_framework import AmmeterTestFramework
 from src.testing.statistics_analyzer import StatisticsAnalyzer
 from src.utils.emulator_launcher import start_emulators, AMMETER_CLASSES
@@ -19,18 +21,18 @@ def parse_args():
     return parser.parse_args()
 
 
-def print_result(ammeter_type: str, result: dict) -> None:
+def print_result(ammeter_type: str, result: TestResult) -> None:
     print(f"\n=== {ammeter_type} ===")
-    print(f"  run_id:            {result['run_id']}")
-    print(f"  samples collected: {result['samples_collected']}/{result['samples_requested']} (errors: {result['errors']})")
+    print(f"  run_id:            {result.run_id}")
+    print(f"  samples collected: {result.samples_collected}/{result.samples_requested} (errors: {result.errors})")
     print("  statistics:")
-    for metric, value in result["statistics"].items():
+    for metric, value in result.statistics.items():
         print(f"    {metric:>8}: {value}")
-    if result.get("plot_path"):
-        print(f"  plot saved to: {result['plot_path']}")
+    if result.plot_path:
+        print(f"  plot saved to: {result.plot_path}")
 
 
-def print_history(framework: AmmeterTestFramework, ammeter_type: str) -> list:
+def print_history(framework: AmmeterTestFramework, ammeter_type: str) -> List[TestResult]:
     """Prints every archived run for one ammeter type (oldest first, since run_ids
     are timestamp-based and list_results() sorts by filename). Returns the list."""
     records = framework.result_manager.list_results(ammeter_type)
@@ -42,7 +44,7 @@ def print_history(framework: AmmeterTestFramework, ammeter_type: str) -> list:
     header = f"  {'run_id':<32} {'timestamp':<26} {'mean':>10} {'median':>10} {'stdev':>10} {'CV':>8} {'samples':>7}"
     print(header)
     for r in records:
-        stats = r.get("statistics", {}) or {}
+        stats = r.statistics or {}
         mean = stats.get("mean") or 0.0
         stdev = stats.get("stdev") or 0.0
         # Prefer the stored metric (now part of the default statistical_metrics list);
@@ -50,12 +52,12 @@ def print_history(framework: AmmeterTestFramework, ammeter_type: str) -> list:
         cv = stats.get("coefficient_of_variation")
         if cv is None:
             cv = (stdev / mean) if mean else float("inf")
-        print(f"  {r['run_id']:<32} {r.get('timestamp', ''):<26} {mean:>10.4f} "
-              f"{(stats.get('median') or 0.0):>10.4f} {stdev:>10.4f} {cv:>8.3f} {r.get('samples_collected', 0):>7}")
+        print(f"  {r.run_id:<32} {r.timestamp:<26} {mean:>10.4f} "
+              f"{(stats.get('median') or 0.0):>10.4f} {stdev:>10.4f} {cv:>8.3f} {r.samples_collected:>7}")
     return records
 
 
-def print_and_save_comparison(framework: AmmeterTestFramework, results_by_ammeter: dict, source: str) -> None:
+def print_and_save_comparison(framework: AmmeterTestFramework, results_by_ammeter: Dict[str, TestResult], source: str) -> None:
     label = "Cross-ammeter comparison" if source == "live" else "Historical comparison (most recent archived run per ammeter)"
     print(f"\n=== {label} (sorted by precision: lowest coefficient of variation first) ===")
     print("Note: no reference/calibrated current is available, so this measures precision")
@@ -73,7 +75,7 @@ def print_and_save_comparison(framework: AmmeterTestFramework, results_by_ammete
     comparison_record = {
         "timestamp": datetime.now().isoformat(),
         "source": source,
-        "ammeter_run_ids": {ammeter_type: result["run_id"] for ammeter_type, result in results_by_ammeter.items()},
+        "ammeter_run_ids": {ammeter_type: result.run_id for ammeter_type, result in results_by_ammeter.items()},
         "comparison": comparison.reset_index().to_dict(orient="records"),
         "conclusion": conclusion,
         "most_precise_ammeter": most_precise,
